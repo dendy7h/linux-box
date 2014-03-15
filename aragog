@@ -22,22 +22,21 @@ my $finder = URI::Find->new(    # URI::Find object instance
 my $url;                        # Target URL
 my @max = (0, undef);           # Max number of URL Caches (true/false, #)
 my $map;                        # URL Mapfile
-my $dbh;			# Database Connection
+my $dbh;						# Database Connection
 
 # Argument Handle Loop
 while ( my($index, $value) = each @ARGV) {
-    given ($value) {
-        when ("-?"||"-help") {
+        if ($value eq ("-?"||"-help")) {
             print "USAGE: aragog -u <URL> -m <MAX> -s <URLMAP>\n\n";
             printf "Option:%18s"," Description:\n";
             printf "-u%26s", "URL/Web Address\n";
             printf "-m%23s", "Maximum URLS\n";
             printf "-s%23s", "URL Map File\n";
 		exit 0;
-        }
-        when ("-u") { $url = $ARGV[$index + 1]; }
-        when ("-m") { @max = (1, $ARGV[$index + 1]); }
-        when ("-s") { $map = $ARGV[$index + 1]; }
+        } 
+        elsif ($value eq ("-u")) { $url = $ARGV[$index + 1]; }
+        elsif ($value eq ("-m")) { @max = (1, $ARGV[$index + 1]); }
+        elsif ($value eq ("-s")) { $map = $ARGV[$index + 1]; }
     }
 }
 
@@ -48,16 +47,16 @@ if(!$max[0]) {
     print "Maximum not specifed, this will cache all urls. Continue? (y/n)>";
     chomp(my $response = <STDIN>);
     if ($response =~ /y(|es)/i) {                 
-        print "\nProceeding without max.\n"; 
+        print "\nProceeding without a max.\n"; 
     } elsif ($response =~ /n(|o)/i) {
         print "\nAction cancelled.\n";
         exit 0;
     } else {
-        print "\nInvalid input from context.\n";
+        print "\nInvalid response.\n";
         exit 0;
     }
 }
-if(!$map) { print "\nMissing Mapfile Try 'aragog-?'\n"; exit 0; }
+if(!$map) { print "\nMissing Mapfile. Try 'aragog-?'\n"; exit 0; }
 
 # Get HTML source code from url
 my $html = get($url);
@@ -98,8 +97,8 @@ if($max[0])
         getstore($source, "web/$count.html");   # Store html sources in files
         print URLMAP "$count\t$source\n";
         print STDERR "Getting $count\t$source\n";
-	$dbh->do("INSERT INTO site (url) VALUES ('$source')");
-	$count++;
+		$dbh->do("INSERT INTO site (url) VALUES ('$source')");
+		$count++;
     }
 }
 else
@@ -109,7 +108,7 @@ else
         print URLMAP "$count\t$value\n";
         print STDERR "Getting $count\t$value\n";
         $dbh->do("INSERT INTO site (url) VALUES ('$value')");
-	$count++;
+		$count++;
     }
 }
 
