@@ -24,7 +24,7 @@ my @max = (0, undef);           # Max number of URL Caches (true/false, #)
 my $map;                        # URL Mapfile
 my $dbh;			# Database Connection
 
-# Argument Handling
+# Argument Handle Loop
 while ( my($index, $value) = each @ARGV) {
     given ($value) {
         when ("-?"||"-help") {
@@ -41,7 +41,7 @@ while ( my($index, $value) = each @ARGV) {
     }
 }
 
-# Argument Handlers
+# Argument Validation
 if(!$url) { print "Missing URL. Try 'aragog -?'\n"; exit 0; }
 if(!($url =~ /$RE{URI}{HTTP}/)) { print "Invalid HTTP URL\n"; exit 0; }
 if(!$max[0]) {
