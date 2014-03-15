@@ -1,0 +1,120 @@
+#!/usr/bin/perl
+#
+# Name: Aragog
+# Description: Simple Perl Web Spider
+# Author: jllusty
+
+use strict;
+use warnings;
+use 5.012;
+use LWP::Simple;
+use Regexp::Common qw/URI/;
+use DBI;
+require URI::Find;
+
+my @urls;                       # URL and URI array
+my $finder = URI::Find->new(    # URI::Find object instance
+    sub {                       # URI::Find object callback subroutine
+        my $uri = shift;
+        push @urls, $uri;
+    }
+);
+my $url;                        # Target URL
+my @max = (0, undef);           # Max number of URL Caches (true/false, #)
+my $map;                        # URL Mapfile
+my $dbh;			# Database Connection
+
+# Argument Handling
+while ( my($index, $value) = each @ARGV) {
+    given ($value) {
+        when ("-?"||"-help") {
+            print "USAGE: aragog -u <URL> -m <MAX> -s <URLMAP>\n\n";
+            printf "Option:%18s"," Description:\n";
+            printf "-u%26s", "URL/Web Address\n";
+            printf "-m%23s", "Maximum URLS\n";
+            printf "-s%23s", "URL Map File\n";
+		exit 0;
+        }
+        when ("-u") { $url = $ARGV[$index + 1]; }
+        when ("-m") { @max = (1, $ARGV[$index + 1]); }
+        when ("-s") { $map = $ARGV[$index + 1]; }
+    }
+}
+
+# Argument Handlers
+if(!$url) { print "Missing URL. Try 'aragog -?'\n"; exit 0; }
+if(!($url =~ /$RE{URI}{HTTP}/)) { print "Invalid HTTP URL\n"; exit 0; }
+if(!$max[0]) {
+    print "Maximum not specifed, this will cache all urls. Continue? (y/n)>";
+    chomp(my $response = <STDIN>);
+    if ($response =~ /y(|es)/i) {                 
+        print "\nProceeding without max.\n"; 
+    } elsif ($response =~ /n(|o)/i) {
+        print "\nAction cancelled.\n";
+        exit 0;
+    } else {
+        print "\nInvalid input from context.\n";
+        exit 0;
+    }
+}
+if(!$map) { print "\nMissing Mapfile Try 'aragog-?'\n"; exit 0; }
+
+# Get HTML source code from url
+my $html = get($url);
+
+# Find all URLs and URIs in HTML source
+$finder->find(\$html);
+
+# Open URl Mapfile
+open(URLMAP, ">", $map) || die "can't open $map";
+
+# Delete Dopplegangers
+while ( my($index, $value) = each @urls) {
+    my %seen = ();              # Seen hash
+    my @r = ();                 # Formatted Array
+    foreach my $u (@urls) {     
+        unless ($seen{$u}) {    # Unless url exists in hash
+            push @r, $u;        # Populate Formatted Array
+            $seen{$u} = 1;      # Set url into hash
+        }
+    }
+    @urls = @r;                 # Original URL Array = Formatted Array
+}
+
+# Zero Counter
+my $count = 0;
+
+# Connect to MySQL Database
+$dbh = DBI->connect('dbi:mysql:perl','root','root')
+	|| die "Connection Error: $DBI::errstr\n";
+my $sql;
+my $sth;
+
+# Storage
+if($max[0])
+{
+    for (my $i=0; $i < $max[1]; $i++) {
+        my $source = $urls[int(rand($#urls+1))]; # Pick random urls from array
+        getstore($source, "web/$count.html");   # Store html sources in files
+        print URLMAP "$count\t$source\n";
+        print STDERR "Getting $count\t$source\n";
+		$dbh->do("INSERT INTO site (url) VALUES ('$source')");
+		$count++;
+    }
+}
+else
+{
+    while ( my($index, $value) = each @urls ) {
+        getstore($value, "web/$count.html"); # Store html sources in files
+        print URLMAP "$count\t$value\n";
+        print STDERR "Getting $count\t$value\n";
+        $dbh->do("INSERT INTO site (url) VALUES ('$value')");
+		$count++;
+    }
+}
+
+# Close Filehandle Reference
+close URLMAP;
+
+# Close Connection
+
