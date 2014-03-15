@@ -98,8 +98,8 @@ if($max[0])
         getstore($source, "web/$count.html");   # Store html sources in files
         print URLMAP "$count\t$source\n";
         print STDERR "Getting $count\t$source\n";
-		$dbh->do("INSERT INTO site (url) VALUES ('$source')");
-		$count++;
+	$dbh->do("INSERT INTO site (url) VALUES ('$source')");
+	$count++;
     }
 }
 else
@@ -109,7 +109,7 @@ else
         print URLMAP "$count\t$value\n";
         print STDERR "Getting $count\t$value\n";
         $dbh->do("INSERT INTO site (url) VALUES ('$value')");
-		$count++;
+	$count++;
     }
 }
 
