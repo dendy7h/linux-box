@@ -117,4 +117,4 @@ else
 close URLMAP;
 
 # Close Connection
-
+$dbh->disconnect();
