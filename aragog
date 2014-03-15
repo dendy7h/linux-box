@@ -26,18 +26,17 @@ my $dbh;						# Database Connection
 
 # Argument Handle Loop
 while ( my($index, $value) = each @ARGV) {
-        if ($value eq ("-?"||"-help")) {
-            print "USAGE: aragog -u <URL> -m <MAX> -s <URLMAP>\n\n";
-            printf "Option:%18s"," Description:\n";
-            printf "-u%26s", "URL/Web Address\n";
-            printf "-m%23s", "Maximum URLS\n";
-            printf "-s%23s", "URL Map File\n";
-		exit 0;
-        } 
-        elsif ($value eq ("-u")) { $url = $ARGV[$index + 1]; }
-        elsif ($value eq ("-m")) { @max = (1, $ARGV[$index + 1]); }
-        elsif ($value eq ("-s")) { $map = $ARGV[$index + 1]; }
-    }
+    if ($value eq ("-?"||"-help")) {
+        print "USAGE: aragog -u <URL> -m <MAX> -s <URLMAP>\n\n";
+        printf "Option:%18s"," Description:\n";
+        printf "-u%26s", "URL/Web Address\n";
+        printf "-m%23s", "Maximum URLS\n";
+    	printf "-s%23s", "URL Map File\n";
+	exit 0;
+    } 
+    elsif ($value eq ("-u")) { $url = $ARGV[$index + 1]; }
+    elsif ($value eq ("-m")) { @max = (1, $ARGV[$index + 1]); }
+	elsif ($value eq ("-s")) { $map = $ARGV[$index + 1]; }
 }
 
 # Argument Validation
