@@ -3,13 +3,14 @@
 # Name: Aragog
 # Description: Simple Perl Web Spider
 # Author: jllusty
+# Note: Database functionality commented out - not removed
 
 use strict;
 use warnings;
 use 5.012;
 use LWP::Simple;
 use Regexp::Common qw/URI/;
-use DBI;
+# use DBI;
 require URI::Find;
 
 my @urls;                       # URL and URI array
@@ -22,7 +23,7 @@ my $finder = URI::Find->new(    # URI::Find object instance
 my $url;                        # Target URL
 my @max = (0, undef);           # Max number of URL Caches (true/false, #)
 my $map;                        # URL Mapfile
-my $dbh;						# Database Connection
+# my $dbh;						# Database Connection
 
 # Argument Handle Loop
 while ( my($index, $value) = each @ARGV) {
@@ -79,14 +80,15 @@ while ( my($index, $value) = each @urls) {
     @urls = @r;                 # Original URL Array = Formatted Array
 }
 
+# Connect to MySQL Database
+# $dbh = DBI->connect('dbi:mysql:perl','root','root')
+# 	|| die "Connection Error: $DBI::errstr\n";
+
+# my $sql;
+# my $sth;
+
 # Zero Counter
 my $count = 0;
-
-# Connect to MySQL Database
-$dbh = DBI->connect('dbi:mysql:perl','root','root')
-	|| die "Connection Error: $DBI::errstr\n";
-my $sql;
-my $sth;
 
 # Storage
 if($max[0])
@@ -96,7 +98,7 @@ if($max[0])
         getstore($source, "web/$count.html");   # Store html sources in files
         print URLMAP "$count\t$source\n";
         print STDERR "Getting $count\t$source\n";
-		$dbh->do("INSERT INTO site (url) VALUES ('$source')");
+		# $dbh->do("INSERT INTO site (url) VALUES ('$source')");
 		$count++;
     }
 }
@@ -106,7 +108,7 @@ else
         getstore($value, "web/$count.html"); # Store html sources in files
         print URLMAP "$count\t$value\n";
         print STDERR "Getting $count\t$value\n";
-        $dbh->do("INSERT INTO site (url) VALUES ('$value')");
+        # $dbh->do("INSERT INTO site (url) VALUES ('$value')");
 		$count++;
     }
 }
@@ -115,4 +117,4 @@ else
 close URLMAP;
 
 # Close Connection
-$dbh->disconnect();
+# $dbh->disconnect();
