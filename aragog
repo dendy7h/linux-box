@@ -96,8 +96,8 @@ if($max[0])
     for (my $i=0; $i < $max[1]; $i++) {
         my $source = $urls[int(rand($#urls+1))]; # Pick random urls from array
         getstore($source, "web/$count.html");   # Store html sources in files
-        print URLMAP "$count\t$source\n";
-        print STDERR "Getting $count\t$source\n";
+        print URLMAP "$count\t". $source . "\n";
+        print STDERR "Getting $count\t" . $source ."\n";
 		# $dbh->do("INSERT INTO site (url) VALUES ('$source')");
 		$count++;
     }
